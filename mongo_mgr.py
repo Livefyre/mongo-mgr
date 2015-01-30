@@ -153,6 +153,14 @@ def check_wrapper(check, args, config):
     else:
       check_logic(args, config, *results)
 
+def check_members(args, config):
+  mc = get_mc(args, config)
+  status = get_status(mc)
+  members = status['members']
+  unhealthy_members = filter(lambda member: member['stateStr'] not in ('PRIMARY','SECONDARY'), members)
+  unhealthy_strs = ["%s %s" % (member['name'], member['stateStr']) for member in unhealthy_members]
+  return len(unhealthy_strs), "%s hosts are unhealthy\n" % len(unhealthy_strs) + "\n".join(unhealthy_strs)
+
 def check_lag(args, config):
     mc = get_mc(args, config)
     status = get_status(mc)
@@ -232,6 +240,7 @@ Usage:
   mongo_mgr.py [options] <replica-set> (add|remove|demote|hide|unhide) <hostname>
   mongo_mgr.py [options] <replica-set> check-lag <warn> <critical>
   mongo_mgr.py [options] <replica-set> check-size <warn> <critical>
+  mongo_mgr.py [options] <replica-set> check-members <warn> <critical>
 
 Options:
   -h --help        Show this screen.
@@ -250,6 +259,7 @@ verb_map = {
  'unhide': verb_unhide,
  'check-lag': partial(check_wrapper, check_lag),
  'check-size': partial(check_wrapper, check_size),
+ 'check-members': partial(check_wrapper, check_members),
 }
 
 def main():
