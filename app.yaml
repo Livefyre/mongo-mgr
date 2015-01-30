@@ -1,0 +1,7 @@
+MongoConnections:
+  ConnectionStrings: !spec
+    description: List of replica set names.
+    type: {}
+    value:
+      repl_a: ['repl_a_host1', 'repl_a_host2']
+      repl_b: ['repl_b_host1', 'repl_b_host2']
