@@ -1,0 +1,5 @@
+build/
+dist/
+eggs/
+mongomgr.egg-info/
+mongomgr/__init__.pyc
