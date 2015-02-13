@@ -212,7 +212,6 @@ def get_mc(args, config):
 def get_config(mc):
     local = mc.local
     config = local.system.replset.find_one()
-    print "The primary is %s:%s \n" % mc.primary
     print "The repl config is %s \n" % pformat(config)
     return config
 
