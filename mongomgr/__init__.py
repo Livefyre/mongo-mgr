@@ -10,6 +10,7 @@ from pymongo import MongoClient
 from pymongo.errors import AutoReconnect
 from docopt import docopt
 from functools import partial
+from operator import gt, lt
 
 def verb_list(args, config):
   print "\n".join(config['ConnectionStrings'].keys())
@@ -136,10 +137,15 @@ def check_wrapper(check, args, config):
         crit = int(args['<critical>'])
         warn = int(args['<warn>'])
 
-        if result >= crit:
+        if crit >= warn:
+          cmp = gt
+        elif crit < warn:
+          cmp = lt
+
+        if cmp(result, crit):
             print 'CRITICAL:', output
             exit(2)
-        elif result >= warn:
+        elif cmp(result,warn):
             print 'WARN:', output
             exit(1)
         else:
