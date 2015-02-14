@@ -212,13 +212,11 @@ def get_mc(args, config):
     replica_set  = args["<replica-set>"]
     conn_strings = config['ConnectionStrings'][replica_set]
     mc = MongoReplicaSetClient(",".join(conn_strings), replicaSet=replica_set)
-    print "The connected host is %s \n" % mc.host
     return mc
 
 def get_config(mc):
     local = mc.local
     config = local.system.replset.find_one()
-    print "The repl config is %s \n" % pformat(config)
     return config
 
 def get_status(mc):
