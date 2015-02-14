@@ -7,6 +7,8 @@ import os
 from pyyacc.parser import build
 from pymongo import MongoReplicaSetClient
 from pymongo import MongoClient
+from pymongo import DESCENDING as dec
+from pymongo import ASCENDING as asc
 from pymongo.errors import AutoReconnect
 from docopt import docopt
 from functools import partial
@@ -208,6 +210,22 @@ def check_size(args, config):
     delta_strs = ["%s %s %s" % (host, db, delta) for host, db, delta in sec_size_deltas]
     return max_delta, "MAX delta is %s" % max_delta + "\n".join(delta_strs)
 
+def check_oplog(args, config):
+    mc = get_mc(args, config)
+    members = get_config(mc)['members']
+    hosts = [member['host'] for member in members]
+
+    status = get_status(mc)
+    primary = filter(lambda member: member['stateStr'] in ('PRIMARY'), status['members'])[0]
+    primary_time = primary['optime']
+
+    oplog_starts = {host: get_oplog_start(host) for host in hosts}
+    oplog_deltas = {host: primary_time.time - ts.time for (host, ts) in oplog_starts.items()}
+    min_delta = min([delta for _,delta in oplog_deltas.items()])
+
+    delta_strs = ["%s %s" % (host, delta) for host, delta in oplog_deltas.items()]
+    return min_delta, "MIN delta is %s\n" % min_delta + "\n".join(delta_strs)
+
 def get_mc(args, config):
     replica_set  = args["<replica-set>"]
     conn_strings = config['ConnectionStrings'][replica_set]
@@ -222,6 +240,14 @@ def get_config(mc):
 def get_status(mc):
     status = mc.admin.command('replSetGetStatus', 1)
     return status
+
+def get_oplog_start(hostname):
+    with MongoClient(hostname) as m:
+        dbs = m.admin.command('listDatabases')['databases']
+        local = m.local
+        oplog = local.oplog.rs
+        timestamp = oplog.find().sort('$natural', asc).limit(1)[0]['ts']
+    return timestamp
 
 def reconfig(cfg, mc):
     # A reconfig always causes a reconnect. This is ok.
@@ -244,6 +270,7 @@ Usage:
   mongo_mgr.py [options] <replica-set> check-lag <warn> <critical>
   mongo_mgr.py [options] <replica-set> check-size <warn> <critical>
   mongo_mgr.py [options] <replica-set> check-members <warn> <critical>
+  mongo_mgr.py [options] <replica-set> check-oplog <warn> <critical>
 
 Options:
   -h --help        Show this screen.
@@ -263,6 +290,7 @@ verb_map = {
  'check-lag': partial(check_wrapper, check_lag),
  'check-size': partial(check_wrapper, check_size),
  'check-members': partial(check_wrapper, check_members),
+ 'check-oplog': partial(check_wrapper, check_oplog),
 }
 
 def main():
