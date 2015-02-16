@@ -245,7 +245,7 @@ Usage:
 Options:
   -h --help        Show this screen.
   --version        Show version.
-  --config=<conf>  Comma separated config files [default: app.yaml].
+  --config=<conf>  Comma separated config files.
 """
 
 verb_map = {
@@ -262,9 +262,16 @@ verb_map = {
  'check-members': partial(check_wrapper, check_members),
 }
 
+_ROOT = os.path.abspath(os.path.dirname(__file__))
+
 def main():
     args = docopt(usage)
-    config_files = args['--config'].split(",")
+    app_yaml = os.path.join(_ROOT, "app.yaml")
+    if args['--config'] is not None:
+      config_paths = args['--config'].split(",")
+    else:
+      config_paths = list()
+    config_files = [app_yaml] + config_paths
     builder, settings_dict = build(*config_files)
     verbs = [function for (name, function) in verb_map.items() if args[name]]
     assert len(verbs) == 1
