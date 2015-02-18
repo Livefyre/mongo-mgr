@@ -13,4 +13,5 @@ setup(name='mongomgr',
           'mongomgr = mongomgr:main',
           ],
       },
+      package_data = {'mongomgr': ['app.yaml']},
       zip_safe=False)
