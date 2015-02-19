@@ -202,7 +202,7 @@ def check_size(args, config):
     for host,dbs in sec_db_size.items():
       for name, sec_size in dbs.items():
         try:
-          sec_size_deltas.append( (host, name, abs(pri_sizes[name] - sec_size)) )
+          sec_size_deltas.append( (host, name, int((abs(pri_sizes[name] - sec_size)/pri_sizes[name]))*100) )
         except KeyError as e:
           print "Missing db:", e.args
     max_delta = max([delta for _,_,delta in sec_size_deltas])
