@@ -21,7 +21,7 @@ def verb_list(args, config):
 def verb_config(args, config):
     mc = get_mc(args, config)
     repl_config = get_config(mc)
-    return repl_config
+    pprint(repl_config)
     exit(0)
 
 def verb_status(args, config):

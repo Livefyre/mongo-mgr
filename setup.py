@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='mongomgr',
-      version='0.3',
+      version='0.4',
       description='Tool for managing mongodb replica sets.',
       url='https://github.com/Livefyre/mongo-mgr',
       author='andrew thomson',
