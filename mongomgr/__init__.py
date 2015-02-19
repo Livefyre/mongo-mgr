@@ -264,13 +264,13 @@ usage = \
 mongo_mgr. A MongoDB management tool.
 
 Usage:
-  mongo_mgr.py [options] list
-  mongo_mgr.py [options] <replica-set> (config|status)
-  mongo_mgr.py [options] <replica-set> (add|remove|demote|hide|unhide) <hostname>
-  mongo_mgr.py [options] <replica-set> check-lag <warn> <critical>
-  mongo_mgr.py [options] <replica-set> check-size <warn> <critical>
-  mongo_mgr.py [options] <replica-set> check-members <warn> <critical>
-  mongo_mgr.py [options] <replica-set> check-oplog <warn> <critical>
+  mongomgr [options] list
+  mongomgr [options] <replica-set> (config|status)
+  mongomgr [options] <replica-set> (add|remove|demote|hide|unhide) <hostname>
+  mongomgr [options] <replica-set> check-lag <warn> <critical>
+  mongomgr [options] <replica-set> check-size <warn> <critical>
+  mongomgr [options] <replica-set> check-members <warn> <critical>
+  mongomgr [options] <replica-set> check-oplog <warn> <critical>
 
 Options:
   -h --help        Show this screen.
