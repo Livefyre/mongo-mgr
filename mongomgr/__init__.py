@@ -12,7 +12,7 @@ from pymongo import ASCENDING as asc
 from pymongo.errors import AutoReconnect
 from docopt import docopt
 from functools import partial
-from operator import gt, lt
+from operator import ge, le
 
 def verb_list(args, config):
   print "\n".join(config['ConnectionStrings'].keys())
@@ -140,9 +140,9 @@ def check_wrapper(check, args, config):
         warn = int(args['<warn>'])
 
         if crit >= warn:
-          cmp = gt
+          cmp = ge
         elif crit < warn:
-          cmp = lt
+          cmp = le
 
         if cmp(result, crit):
             print 'CRITICAL:', output
