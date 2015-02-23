@@ -175,9 +175,9 @@ def check_lag(args, config):
     mc = get_mc(args, config)
     status = get_status(mc)
 
-    primary = filter(lambda member: member['stateStr'] in ('PRIMARY'), status['members'])[0]
-    secondaries = filter(lambda member: member['stateStr'] in ('SECONDARY', 'RECOVERING'), status['members'])
-    lag_times = {member['name']:(primary['optimeDate'] - member['optimeDate']).total_seconds() for member in secondaries}
+    members = status['members']
+    primary = filter(lambda member: member['stateStr'] in ('PRIMARY'), members)[0]
+    lag_times = {member['name']:(primary['optimeDate'] - member['optimeDate']).total_seconds() for member in members}
 
     max_lag = max(lag_times.values())
     host_strings = ["%s: %s seconds" % h for h in lag_times.items()]
