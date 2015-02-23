@@ -14,6 +14,8 @@ from docopt import docopt
 from functools import partial
 from operator import ge, le
 
+CONNECTION_ARGS = { "socketTimeoutMS":1000,
+                    "connectTimeoutMS":1000}
 def verb_list(args, config):
   print "\n".join(config['ConnectionStrings'].keys())
   exit(0)
@@ -183,7 +185,7 @@ def check_lag(args, config):
     return (max_lag, lag_str)
 
 def get_db_sizes(hostname):
-    with MongoClient(hostname) as m:
+    with MongoClient(hostname, **CONNECTION_ARGS) as m:
         dbs = m.admin.command('listDatabases')['databases']
     return dbs
 
@@ -192,7 +194,7 @@ def check_size(args, config):
     members = get_config(mc)['members']
     (primary_host, primary_port) = mc.primary
 
-    with MongoClient(primary_host, primary_port) as m:
+    with MongoClient(primary_host, primary_port, **CONNECTION_ARGS) as m:
         dbs = m.admin.command('listDatabases')['databases']
         pri_sizes = {db['name']:db['sizeOnDisk'] for db in dbs}
 
@@ -229,7 +231,7 @@ def check_oplog(args, config):
 def get_mc(args, config):
     replica_set  = args["<replica-set>"]
     conn_strings = config['ConnectionStrings'][replica_set]
-    mc = MongoReplicaSetClient(",".join(conn_strings), replicaSet=replica_set)
+    mc = MongoReplicaSetClient(",".join(conn_strings), replicaSet=replica_set, **CONNECTION_ARGS)
     return mc
 
 def get_config(mc):
@@ -242,7 +244,7 @@ def get_status(mc):
     return status
 
 def get_oplog_start(hostname):
-    with MongoClient(hostname) as m:
+    with MongoClient(hostname, **CONNECTION_ARGS) as m:
         dbs = m.admin.command('listDatabases')['databases']
         local = m.local
         oplog = local.oplog.rs
