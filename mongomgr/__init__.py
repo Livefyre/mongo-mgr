@@ -173,11 +173,16 @@ def check_members(args, config):
 
 def check_lag(args, config):
     mc = get_mc(args, config)
-    status = get_status(mc)
+    repl_status = get_status(mc)
+    repl_config = get_config(mc)
 
-    members = status['members']
-    primary = filter(lambda member: member['stateStr'] in ('PRIMARY'), members)[0]
-    lag_times = {member['name']:(primary['optimeDate'] - member['optimeDate']).total_seconds() for member in members}
+    members_status = repl_status['members']
+    members_config = repl_config['members']
+
+    visible = [ member['host'] for member in members_config if not member.has_key('hidden')]
+    primary = filter(lambda member_status: member_status['stateStr'] in ('PRIMARY'), members_status)[0]
+    lag_times = {member_status['name']:(primary['optimeDate'] - member_status['optimeDate']).total_seconds() for member_status in members_status if member_status['name'] in visible}
+
 
     max_lag = max(lag_times.values())
     host_strings = ["%s: %s seconds" % h for h in lag_times.items()]
