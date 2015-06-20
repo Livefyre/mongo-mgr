@@ -201,15 +201,20 @@ def check_size(args, config):
 
     with MongoClient(primary_host, primary_port, **CONNECTION_ARGS) as m:
         dbs = m.admin.command('listDatabases')['databases']
-        pri_sizes = {db['name']:db['sizeOnDisk'] for db in dbs}
+        pri_sizes = {db['name']:m[db['name']].command('dbStats')['dataSize'] for db in dbs}
 
     secondaries = filter(lambda member: member['host'] != primary_host, members)
-    sec_db_size = {member['host']:{db['name']:db['sizeOnDisk'] for db in get_db_sizes(member['host']) } for member in secondaries}
+    sec_db_size = {member['host']:{db['name']:m[db['name']].command('dbStats')['dataSize'] for db in get_db_sizes(member['host']) } for member in secondaries}
     sec_size_deltas = []
     for host,dbs in sec_db_size.items():
       for name, sec_size in dbs.items():
         try:
           sec_size_deltas.append( (host, name, int((abs(pri_sizes[name] - sec_size)/pri_sizes[name]))*100) )
+        except ZeroDivisionError:
+          if sec_size == 0:
+            sec_size_deltas.append( (host, name, 0) )
+          else:
+            sec_size_deltas.append( (host, name, float('inf')) )
         except KeyError as e:
           print "Missing db:", e.args
     max_delta = max([delta for _,_,delta in sec_size_deltas])
