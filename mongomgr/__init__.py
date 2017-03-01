@@ -2,6 +2,8 @@
 # Buckets timestamps by some data property.
 
 import pdb
+import sys
+from time import sleep
 from pprint import pformat, pprint
 import os
 from pyyacc.parser import build
@@ -56,7 +58,7 @@ def verb_remove(args, config):
     mc = get_mc(args, config)
     repl_config = get_config(mc)
 
-    primary = "%s:%s" % mc.primary
+    primary = get_primary(mc)
     if hostname == primary:
         print "You are trying to remove the primary!"
         exit(1)
@@ -78,7 +80,7 @@ def verb_demote(args, config):
     mc = get_mc(args, config)
     repl_config = get_config(mc)
 
-    primary = "%s:%s" % mc.primary
+    primary = get_primary(mc)
     if primary == hostname:
         print primary, "Stepping down"
         result = mc.admin.command('replSetStepDown', 60)
@@ -91,7 +93,7 @@ def verb_demote(args, config):
 def verb_hide(args, config):
     hostname = args['<hostname>']
     mc = get_mc(args, config)
-    primary = "%s:%s" % mc.primary
+    primary = get_primary(mc)
     if primary == hostname:
         print "Cannot hide the primary:", primary
         exit(1)
@@ -117,7 +119,7 @@ def verb_hide(args, config):
 def verb_unhide(args, config):
     hostname = args['<hostname>']
     mc = get_mc(args, config)
-    primary = "%s:%s" % mc.primary
+    primary = get_primary(mc)
     repl_config = get_config(mc)
     for member in repl_config['members']:
         if member['host'] == hostname:
@@ -270,6 +272,20 @@ def reconfig(cfg, mc):
     new_cfg = get_config(mc)
     assert new_cfg == cfg, (new_cfg, cfg)
     return new_cfg
+
+def get_primary(mc):
+    tries = 5
+    while tries > 0:
+        try:
+            primary = '%s:%s' % mc.primary
+            break
+        except:
+            tries -= 1
+            sleep(1)
+    if not tries:
+        print 'Could not get primary info in a timely manner, exiting'
+        sys.exit(1)
+    return primary
 
 usage = \
 """
