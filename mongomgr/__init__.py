@@ -181,7 +181,7 @@ def check_lag(args, config):
     members_status = repl_status['members']
     members_config = repl_config['members']
 
-    visible = [ member['host'] for member in members_config if not member.has_key('hidden')]
+    visible = [ member['host'] for member in members_config if not member.get('hidden')]
     primary = filter(lambda member_status: member_status['stateStr'] in ('PRIMARY'), members_status)[0]
     lag_times = {member_status['name']:(primary['optimeDate'] - member_status['optimeDate']).total_seconds() for member_status in members_status if member_status['name'] in visible}
 
